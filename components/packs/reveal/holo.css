@@ -1,0 +1,181 @@
+.holo-card {
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.holo-card__shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity var(--duration-normal, 300ms) ease-out;
+  background: radial-gradient(
+    circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    var(--holo-color, #ffffff) 0%,
+    transparent 55%
+  );
+}
+
+.holo-card__sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: color-dodge;
+  transition: opacity var(--duration-normal, 300ms) ease-out;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 4%,
+    transparent 8%,
+    transparent 16%
+  );
+  background-size: 220% 220%;
+  background-position: calc(var(--pointer-x, 50%) * 1.4) calc(var(--pointer-y, 50%) * 1.4);
+}
+
+.holo-card[data-holo-active='true'] .holo-card__shine {
+  opacity: 0.55;
+}
+
+.holo-card[data-holo-active='true'] .holo-card__sweep {
+  opacity: 0.4;
+}
+
+.holo-card__back-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.06) 45%, transparent 60%);
+  background-size: 250% 250%;
+  animation: back-sheen-drift 3.5s ease-in-out infinite;
+}
+
+@keyframes back-sheen-drift {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
+
+.telegraph-glow {
+  position: absolute;
+  inset: -25%;
+  border-radius: 999px;
+  filter: blur(36px);
+  background: var(--telegraph-color, transparent);
+  opacity: 0;
+  animation: telegraph-pulse 1.3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.telegraph-rays {
+  position: absolute;
+  inset: -60%;
+  pointer-events: none;
+  opacity: 0.25;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--telegraph-color, transparent) 8deg,
+    transparent 18deg,
+    transparent 60deg,
+    var(--telegraph-color, transparent) 68deg,
+    transparent 78deg,
+    transparent 120deg
+  );
+  animation: telegraph-rotate 6s linear infinite;
+}
+
+@keyframes telegraph-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes telegraph-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hit-spotlight {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, var(--hit-color, #ffffff) 0%, transparent 55%);
+  opacity: 0;
+  animation: hit-spotlight-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes hit-spotlight-pulse {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+.hit-rays {
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.2;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--hit-color, transparent) 6deg,
+    transparent 14deg,
+    transparent 40deg
+  );
+  animation: telegraph-rotate 12s linear infinite;
+}
+
+.hit-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: #ffffff;
+}
+
+.hit-sparkle {
+  position: fixed;
+  top: var(--sparkle-y, 50%);
+  left: var(--sparkle-x, 50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hit-color, #ffffff);
+  box-shadow: 0 0 8px 2px var(--hit-color, #ffffff);
+  pointer-events: none;
+  opacity: 0;
+  animation: hit-sparkle-twinkle 1.6s ease-in-out infinite;
+  animation-delay: var(--sparkle-delay, 0s);
+}
+
+@keyframes hit-sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
