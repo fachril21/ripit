@@ -395,7 +395,7 @@ begin
     insert into coin_transactions (user_id, amount, reason, balance_after)
     values (
       v_user_id, v_coin_gain,
-      case when v_state.streak_count > 1 then 'streak' else 'daily_login' end,
+      case when v_state.streak_count > 1 then 'streak' else 'daily_login' end::coin_reason,
       v_wallet.coins
     );
   else

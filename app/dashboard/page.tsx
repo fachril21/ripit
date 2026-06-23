@@ -1,21 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Topbar } from '@/components/dashboard/topbar'
-
-type DashboardRpc = {
-  coins: number
-  dust: number
-  free_packs_left: number
-  streak_count: number
-  streak_freezes: number
-}
-
-type DailyCheckinRpc = {
-  streak_count: number
-  free_packs_left: number
-  coins: number
-  coin_gain: number
-}
+import { DailyRewardModal } from '@/components/economy/daily-reward-modal'
+import type { DailyCheckinResult, DashboardStats } from '@/lib/economy/types'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -35,34 +22,34 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
-  const { data: checkin } = await supabase.rpc('daily_checkin')
+  const { data: checkin, error: checkinError } = await supabase.rpc('daily_checkin')
+  if (checkinError) {
+    console.error('daily_checkin failed:', checkinError.message)
+  }
+
   const { data: dashboard, error } = await supabase.rpc('get_dashboard')
 
   if (error || !dashboard) {
     throw new Error('Gagal memuat dashboard.')
   }
 
-  const stats = dashboard as DashboardRpc
-  const dailyReward = checkin as DailyCheckinRpc | null
+  const stats = dashboard as DashboardStats
+  const dailyReward = checkin as DailyCheckinResult | null
 
   return (
     <main className="min-h-screen">
+      {dailyReward && dailyReward.coin_gain > 0 && <DailyRewardModal reward={dailyReward} />}
+
       <Topbar
         username={profile.username}
         coins={stats.coins}
         dust={stats.dust}
         freePacksLeft={stats.free_packs_left}
         streakCount={stats.streak_count}
+        streakFreezes={stats.streak_freezes}
       />
 
       <div className="p-6">
-        {dailyReward && dailyReward.coin_gain > 0 && (
-          <div className="mb-6 rounded-md bg-amber-500/15 px-4 py-3 text-sm text-amber-300 ring-1 ring-amber-500/30">
-            Login harian: +{dailyReward.coin_gain} coin (streak {dailyReward.streak_count}🔥), free
-            pack diisi ulang.
-          </div>
-        )}
-
         <h1 className="text-xl font-bold">Dashboard</h1>
         <p className="mt-2 text-sm text-neutral-400">
           Pack opening, binder, dan misi belum tersedia di epic ini.
