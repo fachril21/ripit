@@ -1,0 +1,6 @@
+[functions.sync-catalog]
+# This function is only ever invoked by pg_cron / manual backfill via the
+# SYNC_CATALOG_SECRET bearer check inside the function itself — it never
+# receives a real Supabase user/anon JWT, so the platform-level JWT gate
+# must be disabled or every call 401s before reaching our code.
+verify_jwt = false
