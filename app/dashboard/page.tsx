@@ -71,6 +71,12 @@ export default async function DashboardPage() {
           >
             Misi
           </Link>
+          <Link
+            href="/leaderboard"
+            className="inline-block rounded-md border border-neutral-700 px-4 py-2 text-sm font-medium"
+          >
+            Leaderboard
+          </Link>
         </div>
       </div>
     </main>

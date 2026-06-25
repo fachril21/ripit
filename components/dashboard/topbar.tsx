@@ -39,6 +39,9 @@ export function Topbar({
         <Link href="/collection/duplicates" className="text-sm text-neutral-400 underline">
           Dobel
         </Link>
+        <Link href="/leaderboard" className="text-sm text-neutral-400 underline">
+          Leaderboard
+        </Link>
         <Link href="/dashboard/coins" className="text-sm text-neutral-400 underline">
           Riwayat coin
         </Link>
