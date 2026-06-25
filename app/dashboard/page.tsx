@@ -52,7 +52,6 @@ export default async function DashboardPage() {
 
       <div className="p-6">
         <h1 className="text-xl font-bold">Dashboard</h1>
-        <p className="mt-2 text-sm text-neutral-400">Misi belum tersedia di epic ini.</p>
         <div className="mt-4 flex gap-3">
           <Link
             href="/dashboard/packs"
@@ -65,6 +64,12 @@ export default async function DashboardPage() {
             className="inline-block rounded-md border border-neutral-700 px-4 py-2 text-sm font-medium"
           >
             Koleksi
+          </Link>
+          <Link
+            href="/missions"
+            className="inline-block rounded-md border border-neutral-700 px-4 py-2 text-sm font-medium"
+          >
+            Misi
           </Link>
         </div>
       </div>

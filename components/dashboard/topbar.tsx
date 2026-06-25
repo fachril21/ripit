@@ -3,6 +3,7 @@ import { logout } from '@/lib/auth/actions'
 import { WalletBalance } from '@/components/economy/wallet-balance'
 import { StreakBadge } from '@/components/economy/streak-badge'
 import { FreePackBadge } from '@/components/economy/free-pack-badge'
+import { MissionNavBadge } from '@/components/economy/mission-nav-badge'
 
 type TopbarProps = {
   username: string
@@ -31,6 +32,7 @@ export function Topbar({
       </div>
 
       <div className="flex items-center gap-4">
+        <MissionNavBadge />
         <Link href="/collection" className="text-sm text-neutral-400 underline">
           Koleksi
         </Link>
