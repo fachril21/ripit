@@ -31,6 +31,9 @@ export function Topbar({
       </div>
 
       <div className="flex items-center gap-4">
+        <Link href="/collection" className="text-sm text-neutral-400 underline">
+          Koleksi
+        </Link>
         <Link href="/dashboard/coins" className="text-sm text-neutral-400 underline">
           Riwayat coin
         </Link>

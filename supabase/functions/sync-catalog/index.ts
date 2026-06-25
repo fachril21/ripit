@@ -74,11 +74,19 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// TCGdex asset URLs are directories — they need a quality + extension suffix.
+// TCGdex card image URLs are directories — they need a quality + extension suffix.
 function withImageQuality(url: string | undefined, ext: "png" | "webp" = "png") {
   if (!url) return null;
   if (/\.(png|webp|jpg|jpeg)$/i.test(url)) return url;
   return `${url}/high.${ext}`;
+}
+
+// TCGdex logo/symbol URLs have no quality variants — just append the extension
+// directly, e.g. https://assets.tcgdex.net/en/swsh/swsh3/logo.png
+function withAssetExtension(url: string | undefined, ext: "png" | "webp" = "png") {
+  if (!url) return null;
+  if (/\.(png|webp|jpg|jpeg)$/i.test(url)) return url;
+  return `${url}.${ext}`;
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -124,7 +132,7 @@ function mapSeriesPayload(series: TcgdexSeries[]) {
   return series.map((s) => ({
     id: s.id,
     name: s.name,
-    logo_url: withImageQuality(s.logo),
+    logo_url: withAssetExtension(s.logo),
   }));
 }
 
@@ -134,8 +142,8 @@ function mapSetPayload(set: TcgdexSetDetail) {
       id: set.id,
       series_id: set.serie?.id ?? null,
       name: set.name,
-      logo_url: withImageQuality(set.logo),
-      symbol_url: withImageQuality(set.symbol),
+      logo_url: withAssetExtension(set.logo),
+      symbol_url: withAssetExtension(set.symbol),
       count_official: set.cardCount?.official ?? 0,
       count_total: set.cardCount?.total ?? 0,
       count_holo: set.cardCount?.holo ?? 0,
@@ -203,23 +211,25 @@ Deno.serve(async (req: Request) => {
   // ── Sets list (brief — only used to pick which sets need work) ───────
   const setList = await fetchJson<TcgdexSetListItem[]>(`${TCGDEX_BASE}/sets`);
 
-  const { data: existingSets } = await supabase
-    .from("sets")
-    .select("id, count_total");
-  const existingCountBySetId = new Map<string, number>(
-    (existingSets ?? []).map((row: { id: string; count_total: number }) => [
-      row.id,
-      row.count_total,
-    ]),
-  );
+  // Compare against cards actually imported, not sets.count_total — that
+  // metadata is written by import_sets independently of whether the
+  // cards import that follows it succeeds, so a partially-imported set
+  // would otherwise look "synced" and be skipped forever.
+  const { data: existingCardRows } = await supabase.from("cards").select("set_id");
+  const existingCardCountBySetId = new Map<string, number>();
+  for (const row of existingCardRows ?? []) {
+    const setId = (row as { set_id: string }).set_id;
+    existingCardCountBySetId.set(setId, (existingCardCountBySetId.get(setId) ?? 0) + 1);
+  }
 
   const candidateSets = body.setIds?.length
     ? setList.filter((s) => body.setIds!.includes(s.id))
     : setList;
 
   const pendingSets = candidateSets.filter((s) => {
+    const liveTotal = s.cardCount?.total ?? 0;
     const unchanged =
-      !body.force && existingCountBySetId.get(s.id) === (s.cardCount?.total ?? 0);
+      !body.force && (existingCardCountBySetId.get(s.id) ?? 0) >= liveTotal && liveTotal > 0;
     return !unchanged;
   });
   const setsSkipped = candidateSets.length - pendingSets.length;
