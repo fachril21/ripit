@@ -82,7 +82,7 @@ export default async function CollectionSetPage({ params }: CollectionSetPagePro
         {binderData.cards.length === 0 ? (
           <p className="text-sm text-neutral-400">Set ini belum memiliki kartu.</p>
         ) : (
-          <BinderGrid cards={binderData.cards} />
+          <BinderGrid cards={binderData.cards} dust={stats.dust} />
         )}
       </div>
     </main>

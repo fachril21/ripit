@@ -7,9 +7,10 @@ import type { BinderCardEntry } from '@/lib/collection/types'
 
 type BinderGridProps = {
   cards: BinderCardEntry[]
+  dust: number
 }
 
-export function BinderGrid({ cards }: BinderGridProps) {
+export function BinderGrid({ cards, dust }: BinderGridProps) {
   const [selectedCard, setSelectedCard] = useState<BinderCardEntry | null>(null)
 
   return (
@@ -23,7 +24,7 @@ export function BinderGrid({ cards }: BinderGridProps) {
       </ul>
 
       {selectedCard && (
-        <CardDetailModal card={selectedCard} onClose={() => setSelectedCard(null)} />
+        <CardDetailModal card={selectedCard} dust={dust} onClose={() => setSelectedCard(null)} />
       )}
     </>
   )

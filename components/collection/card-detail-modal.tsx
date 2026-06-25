@@ -2,13 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useRouter } from 'next/navigation'
 import { isHoloTier, tierGlowColor, tierLabel } from '@/lib/packs/tier'
 import { CardBackPlaceholder } from '@/components/collection/card-back-placeholder'
+import { craftCard } from '@/app/collection/duplicates/actions'
+import { craftCost } from '@/lib/economy/dust'
+import { formatNumber } from '@/lib/format'
 import type { BinderCardEntry } from '@/lib/collection/types'
 import '@/components/packs/reveal/holo.css'
 
 type CardDetailModalProps = {
   card: BinderCardEntry
+  dust: number
   onClose: () => void
 }
 
@@ -20,15 +25,20 @@ const VARIANT_LABELS: Record<Variant, string> = {
   reverse: 'Reverse',
 }
 
-export function CardDetailModal({ card, onClose }: CardDetailModalProps) {
+export function CardDetailModal({ card, dust, onClose }: CardDetailModalProps) {
+  const router = useRouter()
   const cardRef = useRef<HTMLDivElement>(null)
   const ownedVariants = (['normal', 'holo', 'reverse'] as Variant[]).filter(
     (variant) => card[`owned_${variant}`] > 0,
   )
   const [activeVariant, setActiveVariant] = useState<Variant>(ownedVariants[0] ?? 'normal')
+  const [isCrafting, setIsCrafting] = useState(false)
+  const [craftError, setCraftError] = useState<string | null>(null)
   const isOwned = ownedVariants.length > 0
   const isHolo = activeVariant === 'holo' && isHoloTier(card.tier)
   const glowColor = tierGlowColor(card.tier) ?? '#ffffff'
+  const cost = craftCost(card.tier)
+  const canAffordCraft = cost !== null && dust >= cost
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -105,6 +115,34 @@ export function CardDetailModal({ card, onClose }: CardDetailModalProps) {
             <p className="text-xs text-neutral-500">Ilustrator: {card.illustrator}</p>
           )}
         </div>
+
+        {!isOwned && cost !== null && (
+          <div className="mt-4 rounded-md border border-neutral-800 bg-neutral-900 p-3">
+            <p className="text-xs text-neutral-400">
+              Craft: {formatNumber(cost)} dust &middot; Saldo: {formatNumber(dust)} dust
+            </p>
+            {craftError && <p className="mt-1 text-xs text-red-400">{craftError}</p>}
+            <button
+              type="button"
+              disabled={!canAffordCraft || isCrafting}
+              onClick={async () => {
+                setIsCrafting(true)
+                setCraftError(null)
+                const response = await craftCard(card.card_id, 'normal')
+                setIsCrafting(false)
+                if ('error' in response) {
+                  setCraftError(response.error)
+                  return
+                }
+                onClose()
+                router.refresh()
+              }}
+              className="mt-2 w-full rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-black disabled:bg-neutral-700 disabled:text-neutral-400"
+            >
+              {isCrafting ? 'Memproses…' : canAffordCraft ? 'Craft kartu ini' : 'Dust kurang'}
+            </button>
+          </div>
+        )}
 
         <button
           type="button"

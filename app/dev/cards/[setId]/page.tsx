@@ -72,7 +72,7 @@ export default async function DevSetCardsPage({ params }: DevSetCardsPageProps) 
       {binderCards.length === 0 ? (
         <p className="text-sm text-neutral-400">Set ini belum memiliki kartu.</p>
       ) : (
-        <BinderGrid cards={binderCards} />
+        <BinderGrid cards={binderCards} dust={0} />
       )}
     </main>
   )
